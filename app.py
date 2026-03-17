@@ -30,17 +30,28 @@ def predict():
         if not text.strip():
             return jsonify({
                 "prediction": "Error",
-                "confidence": 0,
-                "message": "Empty input"
+                "confidence": 0
             })
 
-        # Clean text
         cleaned = clean_text(text)
 
-        # Vectorize
-        vector = vectorizer.transform([cleaned])
+        # 🔥 FAKE KEYWORDS LIST
+        fake_keywords = [
+            "aliens", "ufo", "time travel", "illuminati",
+            "flat earth", "secret government", "conspiracy",
+            "mind control", "lizard people", "fake virus",
+            "hoax", "propaganda"
+        ]
 
-        # Predict
+        # 🔥 RULE-BASED CHECK (PRIORITY)
+        if any(word in cleaned for word in fake_keywords):
+            return jsonify({
+                "prediction": "Fake News",
+                "confidence": 95.0
+            })
+
+        # 🤖 MODEL PREDICTION
+        vector = vectorizer.transform([cleaned])
         prediction = model.predict(vector)[0]
         confidence = model.predict_proba(vector)[0].max()
 
@@ -57,7 +68,6 @@ def predict():
             "confidence": 0,
             "message": str(e)
         })
-
 # Run server
 if __name__ == "__main__":
     app.run(debug=True)
