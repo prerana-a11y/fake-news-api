@@ -14,7 +14,7 @@ def clean_text(text):
     text = re.sub(r"http\S+", "", text)
     text = re.sub(r"[^a-z\s]", "", text)
     return text
-
+    
 # Home route (for UI)
 @app.route("/")
 def home():
