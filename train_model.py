@@ -8,8 +8,8 @@ from sklearn.linear_model import LogisticRegression
 
 
 # Load datasets
-fake = pd.read_csv("data/Fake.csv")
-real = pd.read_csv("data/True.csv")
+fake = pd.read_csv("Fake.csv")
+real = pd.read_csv("True.csv")
 
 # Add labels
 fake["label"] = 0
