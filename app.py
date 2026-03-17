@@ -1,36 +1,63 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask, request, jsonify, render_template
 import pickle
-import os
+import re
 
 app = Flask(__name__)
-CORS(app)
 
 # Load model and vectorizer
 model = pickle.load(open("model.pkl", "rb"))
 vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
-    text = data["text"]
+# 🔥 SAME CLEANING AS TRAINING
+def clean_text(text):
+    text = str(text).lower()
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    return text
 
-    text_vec = vectorizer.transform([text])
-    prediction = model.predict(text_vec)[0]
-    probability = model.predict_proba(text_vec)[0].max()
-
-    result = "Fake News" if prediction == 1 else "Real News"
-
-    return jsonify({
-        "prediction": result,
-        "confidence": round(probability * 100, 2)
-    })
-
+# Home route (for UI)
 @app.route("/")
 def home():
-    return "Fake News Detection API is running"
+    return render_template("index.html")
 
-import os
+# Prediction API
+@app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        data = request.get_json()
+        text = data.get("text", "")
 
+        if not text.strip():
+            return jsonify({
+                "prediction": "Error",
+                "confidence": 0,
+                "message": "Empty input"
+            })
+
+        # Clean text
+        cleaned = clean_text(text)
+
+        # Vectorize
+        vector = vectorizer.transform([cleaned])
+
+        # Predict
+        prediction = model.predict(vector)[0]
+        confidence = model.predict_proba(vector)[0].max()
+
+        result = "Real News" if prediction == 1 else "Fake News"
+
+        return jsonify({
+            "prediction": result,
+            "confidence": round(confidence * 100, 2)
+        })
+
+    except Exception as e:
+        return jsonify({
+            "prediction": "Error",
+            "confidence": 0,
+            "message": str(e)
+        })
+
+# Run server
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)
