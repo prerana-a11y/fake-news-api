@@ -9,7 +9,7 @@ An AI-powered web application that detects whether a news article is **REAL** or
 * 🔍 Detects fake vs real news instantly
 * ⚡ Fast API response using Flask
 * 🧠 Trained on Kaggle Fake & Real News Dataset
-* 🎨 Interactive UI (chatbot-style / typing animation supported)
+* 🎨 Interactive UI 
 * 📊 Scalable for future improvements (deep learning, APIs)
 
 ---
