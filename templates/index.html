@@ -8,144 +8,152 @@
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background: #0f172a;
+    background: linear-gradient(135deg, #0f172a, #020617);
     color: white;
     display: flex;
     justify-content: center;
+    align-items: center;
     height: 100vh;
 }
 
-/* Chat container */
-.chat {
+/* Glass card */
+.container {
+    width: 90%;
+    max-width: 550px;
+    padding: 30px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* Title glow */
+h1 {
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #3b82f6, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Textarea */
+textarea {
     width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
-/* Messages area */
-.messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-/* Message bubbles */
-.msg {
-    margin: 10px 0;
-    padding: 12px 15px;
+    height: 130px;
     border-radius: 12px;
-    max-width: 75%;
-}
-
-.user {
-    background: #3b82f6;
-    align-self: flex-end;
-}
-
-.bot {
-    background: #1e293b;
-    align-self: flex-start;
-}
-
-/* Input area */
-.input-area {
-    display: flex;
-    padding: 10px;
-    background: #020617;
-}
-
-input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
     border: none;
+    padding: 15px;
+    font-size: 16px;
     outline: none;
-}
-
-button {
-    margin-left: 10px;
-    padding: 12px 16px;
-    border: none;
-    border-radius: 10px;
-    background: #22c55e;
+    background: rgba(255,255,255,0.1);
     color: white;
+}
+
+/* Button */
+button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #3b82f6, #22c55e);
+    color: white;
+    font-size: 16px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
-/* Typing dots */
-.typing {
-    display: inline-block;
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #3b82f6;
 }
 
-.typing span {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    margin: 2px;
+/* Result */
+.result {
+    margin-top: 25px;
+    font-size: 20px;
+}
+
+/* Colors */
+.fake { color: #ef4444; }
+.real { color: #22c55e; }
+
+/* Loader */
+.loader {
+    margin-top: 15px;
+    display: none;
+}
+
+.loader div {
+    width: 10px;
+    height: 10px;
+    margin: 3px;
     background: white;
     border-radius: 50%;
-    animation: blink 1.4s infinite;
+    display: inline-block;
+    animation: bounce 1.2s infinite;
 }
 
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
+.loader div:nth-child(2) { animation-delay: 0.2s; }
+.loader div:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes blink {
-    0%, 80%, 100% { opacity: 0; }
-    40% { opacity: 1; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
 }
+
+/* Confidence bar */
+.bar {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 0%;
+    transition: 0.5s;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="chat">
+<div class="container">
+    <h1>🤖 AI Fake News Detector</h1>
 
-    <div class="messages" id="messages"></div>
+    <textarea id="newsText" placeholder="Type or paste news..."></textarea>
 
-    <div class="input-area">
-        <input id="inputText" placeholder="Type news here...">
-        <button onclick="sendMessage()">Send</button>
+    <button onclick="checkNews()">Analyze News 🚀</button>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div></div><div></div><div></div>
     </div>
 
+    <!-- Result -->
+    <div class="result" id="result"></div>
+
+    <!-- Confidence Bar -->
+    <div class="bar">
+        <div class="fill" id="confidenceBar"></div>
+    </div>
 </div>
 
 <script>
-function addMessage(text, className) {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "msg " + className;
-    msgDiv.innerText = text;
-    document.getElementById("messages").appendChild(msgDiv);
-    msgDiv.scrollIntoView();
-}
+async function checkNews() {
+    const text = document.getElementById("newsText").value;
+    const loader = document.getElementById("loader");
+    const resultDiv = document.getElementById("result");
+    const bar = document.getElementById("confidenceBar");
 
-function showTyping() {
-    const typingDiv = document.createElement("div");
-    typingDiv.className = "msg bot typing";
-    typingDiv.id = "typing";
-
-    typingDiv.innerHTML = "<span></span><span></span><span></span>";
-    document.getElementById("messages").appendChild(typingDiv);
-    typingDiv.scrollIntoView();
-}
-
-function removeTyping() {
-    const t = document.getElementById("typing");
-    if (t) t.remove();
-}
-
-async function sendMessage() {
-    const input = document.getElementById("inputText");
-    const text = input.value.trim();
-
-    if (!text) return;
-
-    addMessage(text, "user");
-    input.value = "";
-
-    showTyping();
+    loader.style.display = "block";
+    resultDiv.innerHTML = "";
+    bar.style.width = "0%";
 
     const response = await fetch("/predict", {
         method: "POST",
@@ -157,34 +165,17 @@ async function sendMessage() {
 
     const data = await response.json();
 
-    removeTyping();
-
-    let reply = "";
+    loader.style.display = "none";
 
     if (data.prediction === "Fake News") {
-        reply = `❌ Fake News\nConfidence: ${data.confidence}%`;
+        resultDiv.innerHTML = `❌ <span class="fake">Fake News</span>`;
+        bar.style.background = "#ef4444";
     } else {
-        reply = `✅ Real News\nConfidence: ${data.confidence}%`;
+        resultDiv.innerHTML = `✅ <span class="real">Real News</span>`;
+        bar.style.background = "#22c55e";
     }
 
-    typeMessage(reply);
-}
-
-/* Typing animation */
-function typeMessage(text) {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "msg bot";
-    document.getElementById("messages").appendChild(msgDiv);
-
-    let i = 0;
-    function typing() {
-        if (i < text.length) {
-            msgDiv.innerText += text.charAt(i);
-            i++;
-            setTimeout(typing, 20);
-        }
-    }
-    typing();
+    bar.style.width = data.confidence + "%";
 }
 </script>
 
