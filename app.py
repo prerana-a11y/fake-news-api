@@ -102,7 +102,7 @@ return jsonify({
     "prediction": result,
     "confidence": round(confidence, 2)
 })
-    except Exception as e:
+except Exception as e:
         return jsonify({
             "prediction": "Error",
             "confidence": 0,
