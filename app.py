@@ -27,15 +27,17 @@ def predict():
         data = request.get_json()
         text = data.get("text", "")
 
+        # Empty input check
         if not text.strip():
             return jsonify({
                 "prediction": "Error",
                 "confidence": 0
             })
 
+        # Clean text
         cleaned = clean_text(text)
 
-        # 🔥 FAKE KEYWORDS LIST
+        # 🔥 Fake keywords
         fake_keywords = [
             "aliens", "ufo", "time travel", "illuminati",
             "flat earth", "secret government", "conspiracy",
@@ -43,14 +45,14 @@ def predict():
             "hoax", "propaganda"
         ]
 
-        # 🔥 RULE-BASED CHECK
+        # 🔥 Rule-based fake detection
         if any(word in cleaned for word in fake_keywords):
             return jsonify({
                 "prediction": "Fake News",
                 "confidence": 95.0
             })
 
-        # 🤖 MODEL PREDICTION
+        # 🤖 ML Prediction
         vector = vectorizer.transform([cleaned])
 
         prediction = model.predict(vector)[0]
@@ -67,42 +69,6 @@ def predict():
         })
 
     except Exception as e:
-        return jsonify({
-            "prediction": "Error",
-            "confidence": 0,
-            "message": str(e)
-        })
-        # 🔥 FAKE KEYWORDS LIST
-        fake_keywords = [
-            "aliens", "ufo", "time travel", "illuminati",
-            "flat earth", "secret government", "conspiracy",
-            "mind control", "lizard people", "fake virus",
-            "hoax", "propaganda"
-        ]
-
-        # 🔥 RULE-BASED CHECK (PRIORITY)
-        if any(word in cleaned for word in fake_keywords):
-            return jsonify({
-                "prediction": "Fake News",
-                "confidence": 95.0
-            })
-
-# 🤖 MODEL PREDICTION
-vector = vectorizer.transform([cleaned])
-
-prediction = model.predict(vector)[0]
-
-confidence = abs(model.decision_function(vector)[0])
-
-confidence = min(max(confidence * 20, 5), 100)
-
-result = "Real News" if prediction == 1 else "Fake News"
-
-return jsonify({
-    "prediction": result,
-    "confidence": round(confidence, 2)
-})
-except Exception as e:
         return jsonify({
             "prediction": "Error",
             "confidence": 0,
