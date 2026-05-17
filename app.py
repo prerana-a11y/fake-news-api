@@ -50,8 +50,7 @@ def predict():
                 "confidence": 95.0
             })
 
-        # 🤖 MODEL PREDICTION
-  
+# 🤖 MODEL PREDICTION
 vector = vectorizer.transform([cleaned])
 
 prediction = model.predict(vector)[0]
