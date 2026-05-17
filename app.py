@@ -51,17 +51,21 @@ def predict():
             })
 
         # 🤖 MODEL PREDICTION
-        vector = vectorizer.transform([cleaned])
-        prediction = model.predict(vector)[0]
-        confidence = model.predict_proba(vector)[0].max()
+  
+vector = vectorizer.transform([cleaned])
 
-        result = "Real News" if prediction == 1 else "Fake News"
+prediction = model.predict(vector)[0]
 
-        return jsonify({
-            "prediction": result,
-            "confidence": round(confidence * 100, 2)
-        })
+confidence = abs(model.decision_function(vector)[0])
 
+confidence = min(max(confidence * 20, 5), 100)
+
+result = "Real News" if prediction == 1 else "Fake News"
+
+return jsonify({
+    "prediction": result,
+    "confidence": round(confidence, 2)
+})
     except Exception as e:
         return jsonify({
             "prediction": "Error",
